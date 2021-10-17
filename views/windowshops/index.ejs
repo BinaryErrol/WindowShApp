@@ -1,0 +1,30 @@
+<% layout('layouts/boilerplate') %> 
+<h1>All Windowshops</h1>
+<div>
+    <a href="/windowshops/new">Add a WindowShop</a>
+</div>
+
+    <% for (let windowshop of windowshops) {%>
+        <div class="card" mb-3>
+            <div class="row">
+                <div class="col-md-4">
+                    <img class="img-fluid" alt="" src="<%= windowshop.image  %> ">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <%= windowshop.title %> 
+                        </h5>
+                        <p class="card-text">
+                            <%= windowshop.description %> 
+                        </p>
+                        <p class="card-text">
+                            <%= windowshop.location %> 
+                        </p>
+                        <a href="/windowshops/<%= windowshop._id %> " class="btn btn-primary"> View Windowshop</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %> 
+
