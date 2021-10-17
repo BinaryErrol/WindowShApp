@@ -2,11 +2,12 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
-const { campgroundSchema } = require('./schemas.js');
+const { windowshopSchema, reviewSchema } = require('./schemas.js');
 const catchAsync = require('./utils/catchAsync');
 const ExpressError = require('./utils/ExpressError');
 const methodOverride = require('method-override');
 const Windowshop = require('./models/windowshop');
+const Review = require('./models/review');
 
 mongoose.connect('mongodb://localhost:27017/window-shop', {
     useNewUrlParser: true,
@@ -38,6 +39,16 @@ const validateWindowshop = (req, res, next) => {
     }
 }
 
+const validateReview = (req,res,next) => {
+    const {error} = reviewSchema.validate(req.body);
+    if (error) {
+        const msg = error.details.map(el => el.message).join(',')
+        throw new ExpressError(msg, 400)
+    } else {
+        next();
+    }
+}
+
 app.get('/', (req,res) => {
     res.render('home')
 })
@@ -58,7 +69,7 @@ app.post('/windowshops', validateWindowshop, catchAsync(async (req,res, next) =>
 
 
 app.get('/windowshops/:id', catchAsync(async(req,res) => {
-    const windowshop = await Windowshop.findById(req.params.id);
+    const windowshop = await Windowshop.findById(req.params.id).populate('reviews');
     res.render('windowshops/show', {windowshop});
 }))
 
@@ -77,6 +88,22 @@ app.delete('/windowshops/:id', catchAsync(async (req,res) => {
     const {id} = req.params;
     await Windowshop.findByIdAndDelete(id);
     res.redirect('/windowshops');
+}))
+
+app.post('/windowshops/:id/reviews', validateReview, catchAsync(async (req,res) => {
+    const windowshop = await Windowshop.findById(req.params.id);
+    const review = new Review(req.body.review);
+    windowshop.reviews.push(review);
+    await review.save();
+    await windowshop.save();
+    res.redirect(`/windowshops/${windowshop._id}`);
+}));
+
+app.delete('/windowshops/:id/reviews/:reviewId', catchAsync(async (req,res) => {
+    const {id, reviewId} = req.params;
+    await Windowshop.findByIdAndUpdate(id, { $pull: {reviews: reviewId}})
+    await Review.findByIdAndDelete(req.params.reviewId);
+    res.redirect(`/windowshops/${id}`);
 }))
 
 app.all('*', (req, res, next) => {
