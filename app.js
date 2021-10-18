@@ -2,16 +2,18 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
-const { windowshopSchema, reviewSchema } = require('./schemas.js');
-const catchAsync = require('./utils/catchAsync');
+const session = require('express-session');
+const flash = require('connect-flash');
 const ExpressError = require('./utils/ExpressError');
 const methodOverride = require('method-override');
-const Windowshop = require('./models/windowshop');
-const Review = require('./models/review');
+
+
+const windowshops = require('./routes/windowshops');
+const reviews = require('./routes/reviews');
 
 mongoose.connect('mongodb://localhost:27017/window-shop', {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
 });
 
 const db = mongoose.connection;
@@ -28,83 +30,33 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+app.use(express.static(path.join(__dirname, 'public')));
 
-const validateWindowshop = (req, res, next) => {
-    const { error } = windowshopSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
+const sessionConfig = {
+    secret: 'thisshouldbeabettersecret!',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 * 7
     }
 }
+app.use(session(sessionConfig))
+app.use(flash());
 
-const validateReview = (req,res,next) => {
-    const {error} = reviewSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
+app.use((req, res, next) => {
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
+})
+
+app.use('/windowshops', windowshops)
+app.use('/windowshops/:id/reviews', reviews)
 
 app.get('/', (req,res) => {
     res.render('home')
 })
-app.get('/windowshops', catchAsync(async(req,res) => {
-    const windowshops = await Windowshop.find({});
-    res.render('windowshops/index', {windowshops})
-}))
-
-app.get('/windowshops/new', (req,res) => {
-    res.render('windowshops/new');
-})
-
-app.post('/windowshops', validateWindowshop, catchAsync(async (req,res, next) => {
-        const windowshop = new Windowshop(req.body.windowshop);
-    await windowshop.save();
-    res.redirect(`/windowshops/${windowshop._id}`);   
-}))
-
-
-app.get('/windowshops/:id', catchAsync(async(req,res) => {
-    const windowshop = await Windowshop.findById(req.params.id).populate('reviews');
-    res.render('windowshops/show', {windowshop});
-}))
-
-app.get('/windowshops/:id/edit', catchAsync(async (req,res) => {
-    const windowshop = await Windowshop.findById(req.params.id);
-    res.render('windowshops/edit', {windowshop});
-}))
-
-app.put('/windowshops/:id', validateWindowshop, catchAsync(async (req,res) => {
-    const {id} = req.params
-    const windowshop = await Windowshop.findByIdAndUpdate(id, {...req.body.windowshop});
-    res.redirect(`/windowshops/${windowshop._id}`);
-}))
-
-app.delete('/windowshops/:id', catchAsync(async (req,res) => {
-    const {id} = req.params;
-    await Windowshop.findByIdAndDelete(id);
-    res.redirect('/windowshops');
-}))
-
-app.post('/windowshops/:id/reviews', validateReview, catchAsync(async (req,res) => {
-    const windowshop = await Windowshop.findById(req.params.id);
-    const review = new Review(req.body.review);
-    windowshop.reviews.push(review);
-    await review.save();
-    await windowshop.save();
-    res.redirect(`/windowshops/${windowshop._id}`);
-}));
-
-app.delete('/windowshops/:id/reviews/:reviewId', catchAsync(async (req,res) => {
-    const {id, reviewId} = req.params;
-    await Windowshop.findByIdAndUpdate(id, { $pull: {reviews: reviewId}})
-    await Review.findByIdAndDelete(req.params.reviewId);
-    res.redirect(`/windowshops/${id}`);
-}))
 
 app.all('*', (req, res, next) => {
     next(new ExpressError('Page Not Found!', 404))
