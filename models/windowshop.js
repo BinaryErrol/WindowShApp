@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Review = require('./review');
+const Product = require('./product');
 const Schema = mongoose.Schema;
 
 const WindowshopSchema = new Schema({
@@ -13,6 +14,12 @@ const WindowshopSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Review'
         }
+    ],
+    products: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Product'
+        }
     ]
 });
 
@@ -21,6 +28,14 @@ WindowshopSchema.post('findOneAndDelete', async function (doc) {
         await Review.deleteMany({
             _id: {
                 $in: doc.reviews
+            }
+        })
+    }
+
+    if (doc)  {
+        await Product.deleteMany({
+            _id: {
+                $in: doc.products
             }
         })
     }

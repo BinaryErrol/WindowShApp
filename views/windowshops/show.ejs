@@ -1,7 +1,7 @@
 <% layout('layouts/boilerplate')%>
 
 <div class="row">
-    <div class="col-6">
+    <div class="col-12">
         <div class="card mb-3">
             <img src="<%= windowshop.image%>" class="card-img-top" alt="...">
             <div class="card-body">
@@ -23,9 +23,16 @@
             </div>
         </div>
     </div>
-    <div class="col-6">
+    <div class="col-12">
         <div>
-            <h2>Leave a Review</h2>
+            <p>
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                  Reviews
+                </button>
+              </p>
+              <div class="collapse" id="collapseExample">
+                <div class="card card-body">
+                  <h2>Leave a Review</h2>
             <form action="/windowshops/<%= windowshop._id %>/reviews " method="POST" class="mb-3 validated-form" novalidate>
                 <div class="mb-3" for="rating" >
                     <label class="form-label" for="rating">Rating</label>
@@ -51,6 +58,62 @@
                     </div>
                 </div>
              <% } %>
+                </div>
+              </div>
+            
         </div>
+    </div>
+    <div class="col-12">
+        <p>
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample1" aria-expanded="false" aria-controls="collapseExample1">
+              Add a Product
+            </button>
+          </p>
+          <div class="collapse" id="collapseExample1">
+            <div class="card card-body">
+                <form action="/windowshops/<%= windowshop._id %>/products " method="POST" class="mb-3 validated-form" novalidate>
+                    <div class="mb-3">
+                    <label class="form-label" for="title">Title</label>
+                    <input class="form-control" type="text" id="title" name="product[title]" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="title">Image</label>
+                    <input class="form-control" type="text" id="title" name="product[image]" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="title">$</label>
+                    <input class="form-control" type="text" placeholder="0.00" id="title" name="product[price]" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="title">Description</label>
+                    <input class="form-control" type="text" id="title" name="product[description]" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                </div>
+                <button class="btn btn-success">Submit Product</button>
+                </form>
+            </div>
+          </div>
+          <% for (let product of windowshop.products) { %>
+            <div class="card mb-3">
+                <div class="mb-3 card-body">
+                    <h5 class="card-title"><%= product.title %> </h5>
+                    <img src="<%= product.image %> " alt="...">
+                    <p class="card-text"><%= product.price %> </p>
+                    <p class="card-text"><%= product.description  %> </p>
+
+                </div>
+            </div>
+            <% } %>  
     </div>
 </div>

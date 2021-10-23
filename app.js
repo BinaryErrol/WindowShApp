@@ -10,6 +10,7 @@ const methodOverride = require('method-override');
 
 const windowshops = require('./routes/windowshops');
 const reviews = require('./routes/reviews');
+const products = require('./routes/products');
 
 mongoose.connect('mongodb://localhost:27017/window-shop', {
     useNewUrlParser: true,
@@ -53,6 +54,7 @@ app.use((req, res, next) => {
 
 app.use('/windowshops', windowshops)
 app.use('/windowshops/:id/reviews', reviews)
+app.use('/windowshops/:id/products', products)
 
 app.get('/', (req,res) => {
     res.render('home')
