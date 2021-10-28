@@ -29,6 +29,15 @@ router.post('/', validateProduct, catchAsync(async (req,res) => {
     res.redirect(`/windowshops/${windowshop._id}`);
 }));
 
+router.get('/:id', catchAsync(async(req,res) => {
+    const product = await Product.findById(req.params.id);
+    if(!product){
+        req.flash('error', 'Cannot find that product!');
+        return res.redirect('/windowshops');
+    }
+    res.redirect(`/windowshops/${id}`);
+}))
+
 router.delete('/:productId', catchAsync(async (req,res) => {
     const {id, productId} = req.params;
     await Windowshop.findByIdAndUpdate(id, { $pull: {products: productId}})

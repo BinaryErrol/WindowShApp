@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Review = require('./review');
 const Product = require('./product');
+const Comment = require('./comment');
 const Schema = mongoose.Schema;
 
 const WindowshopSchema = new Schema({

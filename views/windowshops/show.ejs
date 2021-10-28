@@ -112,8 +112,37 @@
                     <p class="card-text">Price: <%= product.price %> </p>
                     <p class="card-text">Description: <%= product.description  %> </p>
 
+                    <p>
+                        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample2" aria-expanded="false" aria-controls="collapseExample2">
+                          Add Comment
+                        </button>
+                      </p>
+                      <div class="collapse" id="collapseExample2">
+                        <div class="card card-body">
+                            <form action="/windowshops/<%= windowshop._id %>/products/<%= product._id %>/comments" method="POST" class="mb-3 validated-form" novalidate>
+                            <div class="mb-3">
+                                <label class="form-label" for="title">Comment</label>
+                                <input class="form-control" type="text" id="comment" name="comment[body]" required>
+                                <div class="valid-feedback">
+                                    Looks good!
+                                </div>
+                            </div>
+                            <button class="btn btn-success">Submit Comment</button>
+                            </form>
+                        </div>
+                      </div>
+
+                      <% for (let comment of product.comments)  {%> 
+                        <p><%= comment.body %></p>
+                        <form action="/windowshops/<%=windowshop._id%>/products/<%=product._id%>/comments/<%=comment._id%>?_method=DELETE" method="POST">
+                            <button class="btn btn-sm btn-danger">DELETE</button>
+                        </form>
+                        <% } %> 
                 </div>
             </div>
+            <form action="/windowshops/<%=windowshop._id%>/products/<%=product._id%>?_method=DELETE" method="POST">
+                <button class="btn btn-sm btn-danger">DELETE</button>
+            </form>
             <% } %>  
     </div>
 </div>

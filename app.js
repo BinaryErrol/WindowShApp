@@ -11,10 +11,11 @@ const methodOverride = require('method-override');
 const windowshops = require('./routes/windowshops');
 const reviews = require('./routes/reviews');
 const products = require('./routes/products');
+const comments = require('./routes/comments');
 
 mongoose.connect('mongodb://localhost:27017/window-shop', {
     useNewUrlParser: true,
-    useUnifiedTopology: true,
+    useUnifiedTopology: true
 });
 
 const db = mongoose.connection;
@@ -55,6 +56,7 @@ app.use((req, res, next) => {
 app.use('/windowshops', windowshops)
 app.use('/windowshops/:id/reviews', reviews)
 app.use('/windowshops/:id/products', products)
+app.use('/windowshops/:id/products/:productId/comments', comments)
 
 app.get('/', (req,res) => {
     res.render('home')

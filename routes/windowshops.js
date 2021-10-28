@@ -34,7 +34,7 @@ router.post('/', validateWindowshop, catchAsync(async (req,res, next) => {
 
 
 router.get('/:id', catchAsync(async(req,res) => {
-    const windowshop = await Windowshop.findById(req.params.id).populate('reviews').populate('products');
+    const windowshop = await Windowshop.findById(req.params.id).populate('reviews').populate({path: 'products', populate: { path: 'comments'}});
     if(!windowshop){
         req.flash('error', 'Cannot find that windowshop!');
         return res.redirect('/windowshops');
