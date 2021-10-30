@@ -1,34 +1,21 @@
 const express = require('express');
 const router = express.Router();
+const campgrounds = require('../controllers/campgrounds');
 const catchAsync = require('../utils/catchAsync');
-const { windowshopSchema} = require('../schemas.js');
-const {isLoggedIn} = require('../middleware');
+const { isLoggedIn, validateWindowshop, isAuthor } = require('../middleware');
 
-const ExpressError = require('../utils/ExpressError');
 const Windowshop = require('../models/windowshop');
 
-const validateWindowshop = (req, res, next) => {
-    const { error } = windowshopSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
 
-router.get('/', catchAsync(async(req,res) => {
-    const windowshops = await Windowshop.find({});
-    res.render('windowshops/index', {windowshops})
-}))
+router.get('/', catchAsync(campgrounds.index))
 
 router.get('/new',isLoggedIn, (req,res) => {
     res.render('windowshops/new');
 })
 
-router.post('/',isLoggedIn, validateWindowshop, catchAsync(async (req,res, next) => {
-    
+router.post('/', isLoggedIn, validateWindowshop, catchAsync(async (req,res, next) => {
     const windowshop = new Windowshop(req.body.windowshop);
+    windowshop.author = req.user._id;
     await windowshop.save();
     req.flash('success', 'Successfully made a new Windowshop!');
     res.redirect(`/windowshops/${windowshop._id}`);   
@@ -36,7 +23,10 @@ router.post('/',isLoggedIn, validateWindowshop, catchAsync(async (req,res, next)
 
 
 router.get('/:id', catchAsync(async(req,res) => {
-    const windowshop = await Windowshop.findById(req.params.id).populate('reviews').populate({path: 'products', populate: { path: 'comments'}});
+    const windowshop = await Windowshop.findById(req.params.id).populate({
+        path: 'reviews', populate: { path: 'author'}}).populate({
+            path: 'products', populate: { path: 'comments', path: 'author'}}).populate('author');
+    console.log(windowshop);
     if(!windowshop){
         req.flash('error', 'Cannot find that windowshop!');
         return res.redirect('/windowshops');
@@ -44,8 +34,9 @@ router.get('/:id', catchAsync(async(req,res) => {
     res.render('windowshops/show', {windowshop});
 }))
 
-router.get('/:id/edit',isLoggedIn, catchAsync(async (req,res) => {
-    const windowshop = await Windowshop.findById(req.params.id);
+router.get('/:id/edit', isLoggedIn, isAuthor, catchAsync(async (req,res) => {
+    const {id} = req.params;
+    const windowshop = await Windowshop.findById(id);
     if(!windowshop){
         req.flash('error', 'Cannot find that windowshop!');
         return res.redirect('/windowshops');
@@ -53,14 +44,14 @@ router.get('/:id/edit',isLoggedIn, catchAsync(async (req,res) => {
     res.render('windowshops/edit', {windowshop});
 }))
 
-router.put('/:id',isLoggedIn, validateWindowshop, catchAsync(async (req,res) => {
-    const {id} = req.params
+router.put('/:id',isLoggedIn, isAuthor, validateWindowshop, catchAsync(async (req,res) => {
+    const {id} = req.params;
     const windowshop = await Windowshop.findByIdAndUpdate(id, {...req.body.windowshop});
     req.flash('success', 'Successfully updated windowshop!');
     res.redirect(`/windowshops/${windowshop._id}`);
 }))
 
-router.delete('/:id',isLoggedIn, catchAsync(async (req,res) => {
+router.delete('/:id',isLoggedIn, isAuthor, catchAsync(async (req,res) => {
     const {id} = req.params;
     await Windowshop.findByIdAndDelete(id);
     req.flash('success', 'You have deleted your windowshop!');

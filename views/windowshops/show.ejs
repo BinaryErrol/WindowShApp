@@ -10,14 +10,18 @@
             </div>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item text-muted"><%= windowshop.location%></li>
+                <li class="list-group-item ">submitted by: <%= windowshop.author.username%></li>
                 <li class="list-group-item">$<%= windowshop.price%>/night</li>
             </ul>
-            <div class="card-body">
+            <% if( currentUser && windowshop.author.equals(currentUser._id)) {%>
+                <div class="card-body">
                 <a class="card-link btn btn-info" href="/windowshops/<%=windowshop._id%>/edit">Edit</a>
                 <form class="d-inline" action="/windowshops/<%=windowshop._id%>?_method=DELETE" method="POST">
                     <button class="btn btn-danger">Delete</button>
                 </form>
             </div>
+                <% } %>  
+            
             <div class="card-footer text-muted">
                 2 days ago
             </div>
@@ -30,6 +34,7 @@
                   Reviews
                 </button>
               </p>
+              <% if(currentUser) {%> 
               <div class="collapse" id="collapseExample">
                 <div class="card card-body">
                   <h2>Leave a Review</h2>
@@ -47,14 +52,18 @@
                 </div>
                 <button class="btn btn-success">Submit</button>
             </form>
+            <% } %> 
             <% for (let review of windowshop.reviews) { %> 
                 <div class="card mb-3">
                     <div class="mb-3 card-body">
                         <h5 class="card-title">Rating: <%= review.rating %></h5>
+                        <h6 class="card-subtitle mb-2 text-muted">By: <%= review.author.username %> </h6>
                         <p class="card-text">Review: <%= review.body %></p>
+                        <% if( currentUser && review.author.equals(currentUser._id)) {%>
                         <form action="/windowshops/<%=windowshop._id%>/reviews/<%=review._id%>?_method=DELETE" method="POST">
                             <button class="btn btn-sm btn-danger">DELETE</button>
                         </form>
+                        <% } %> 
                     </div>
                 </div>
              <% } %>
@@ -66,9 +75,10 @@
     <div class="col-12">
         <p>
             <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample1" aria-expanded="false" aria-controls="collapseExample1">
-              Add a Product
+              Products
             </button>
           </p>
+          <% if( currentUser && windowshop.author.equals(currentUser._id)) {%>
           <div class="collapse" id="collapseExample1">
             <div class="card card-body">
                 <form action="/windowshops/<%= windowshop._id %>/products " method="POST" class="mb-3 validated-form" novalidate>
@@ -104,6 +114,7 @@
                 </form>
             </div>
           </div>
+          <% } %> 
           <% for (let product of windowshop.products) { %>
             <div class="card mb-3">
                 <div class="mb-3 card-body">
@@ -114,9 +125,10 @@
 
                     <p>
                         <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample2" aria-expanded="false" aria-controls="collapseExample2">
-                          Add Comment
+                          Comments
                         </button>
                       </p>
+                      <% if( currentUser) {%>
                       <div class="collapse" id="collapseExample2">
                         <div class="card card-body">
                             <form action="/windowshops/<%= windowshop._id %>/products/<%= product._id %>/comments" method="POST" class="mb-3 validated-form" novalidate>
@@ -131,18 +143,23 @@
                             </form>
                         </div>
                       </div>
-
+                      <% } %> 
                       <% for (let comment of product.comments)  {%> 
+                        <h6 class="card-subtitle mb-2 text-muted"><%= comment.author %> </h6>
                         <p><%= comment.body %></p>
+                        <% if( currentUser && windowshop.author.equals(currentUser._id)) {%>
                         <form action="/windowshops/<%=windowshop._id%>/products/<%=product._id%>/comments/<%=comment._id%>?_method=DELETE" method="POST">
                             <button class="btn btn-sm btn-danger">DELETE</button>
                         </form>
                         <% } %> 
+                        <% } %> 
                 </div>
             </div>
+            <% if( currentUser && product.author.equals(currentUser._id)) {%>
             <form action="/windowshops/<%=windowshop._id%>/products/<%=product._id%>?_method=DELETE" method="POST">
                 <button class="btn btn-sm btn-danger">DELETE</button>
             </form>
+            <% } %> 
             <% } %>  
     </div>
 </div>

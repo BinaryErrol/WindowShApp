@@ -7,6 +7,10 @@ const productSchema = new Schema({
     image: String,
     price: Number,
     description: String,
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
     comments: [
         {
             type: Schema.Types.ObjectId,

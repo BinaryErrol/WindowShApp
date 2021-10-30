@@ -4,24 +4,16 @@ const router = express.Router({mergeParams: true});
 const Windowshop = require('../models/windowshop');
 const Product = require('../models/product');
 
-const { productSchema } = require('../schemas.js');
+const { validateProduct, isAuthor, isLoggedIn } = require('../middleware')
 
 const ExpressError = require('../utils/ExpressError');
 const catchAsync = require('../utils/catchAsync');
 
-const validateProduct = (req,res,next) => {
-    const {error} = productSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
 
-router.post('/', validateProduct, catchAsync(async (req,res) => {
+router.post('/', isLoggedIn, isAuthor, validateProduct, catchAsync(async (req,res) => {
     const windowshop = await Windowshop.findById(req.params.id);
     const product = new Product(req.body.product);
+    product.author = req.user._id;
     windowshop.products.push(product);
     await product.save();
     await windowshop.save();

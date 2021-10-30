@@ -15,7 +15,7 @@ router.post('/register',catchAsync( async(req,res) => {
     const registeredUser = await User.register(user, password);
     req.login(registeredUser, err => {
         if(err) return next(err);
-        req.flash('success','Welcome to Window Shop!');
+        req.flash('success','Welcome to WindowShop!');
         res.redirect('/windowshops');
     })
     } catch(e){
