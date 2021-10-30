@@ -2,10 +2,11 @@ const { windowshopSchema, reviewSchema, productSchema, commentSchema } = require
 const ExpressError = require('./utils/ExpressError');
 const Windowshop = require('./models/windowshop');
 const Review = require('./models/review');
+const Product = require('./models/product');
 
 module.exports.isLoggedIn = (req,res, next) => {
     if (!req.isAuthenticated()) {
-    req.session.returnTo = req.originalUrl;
+    req.session.returnTo = req.originalUrl
     req.flash('error', 'you must be signed in');
     return res.redirect('/login');
 }
@@ -71,4 +72,13 @@ module.exports.isReviewAuthor = async(req,res,next) => {
 
     }
     next();
+}
+
+module.exports.isProductAuthor = async(req,res,next) => {
+    const {id, productId} = req.params;
+    const product = await Product.findById(productId);
+    if (!product.author.equals(req.user._id)) {
+        req.flash('error', 'You do not have permission to do that!');
+        return res.redirect(`/windowshops/${id}`);
+    }
 }

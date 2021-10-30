@@ -4,7 +4,7 @@ const router = express.Router({mergeParams: true});
 const Windowshop = require('../models/windowshop');
 const Product = require('../models/product');
 
-const { validateProduct, isAuthor, isLoggedIn } = require('../middleware')
+const { validateProduct, isAuthor, isLoggedIn, isProductAuthor } = require('../middleware')
 
 const ExpressError = require('../utils/ExpressError');
 const catchAsync = require('../utils/catchAsync');
@@ -30,7 +30,7 @@ router.get('/:id', catchAsync(async(req,res) => {
     res.redirect(`/windowshops/${id}`);
 }))
 
-router.delete('/:productId', catchAsync(async (req,res) => {
+router.delete('/:productId', isProductAuthor, catchAsync(async (req,res) => {
     const {id, productId} = req.params;
     await Windowshop.findByIdAndUpdate(id, { $pull: {products: productId}})
     await Product.findByIdAndDelete(req.params.productId);
