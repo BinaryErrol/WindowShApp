@@ -1,3 +1,4 @@
+const { cloudinary } = require('../cloudinary');
 const Windowshop = require('../models/windowshop');
 
 module.exports.index = async(req,res) => {
@@ -11,6 +12,7 @@ module.exports.renderNewForm = (req,res) => {
 
 module.exports.createWindowshop = async (req,res, next) => {
     const windowshop = new Windowshop(req.body.windowshop);
+    windowshop.images = req.files.map(f => ({url: f.path, filename: f.filename}));
     windowshop.author = req.user._id;
     await windowshop.save();
     req.flash('success', 'Successfully made a new Windowshop!');
@@ -42,6 +44,15 @@ module.exports.renderEditForm = async (req,res) => {
 module.exports.updateWindowshop = async (req,res) => {
     const {id} = req.params;
     const windowshop = await Windowshop.findByIdAndUpdate(id, {...req.body.windowshop});
+    const imgs = req.files.map(f => ({url: f.path, filename: f.filename}));
+    windowshop.images.push(...imgs);
+    await windowshop.save();
+    if (req.body.deleteImages) {
+        for (let filename of req.body.deleteImages) {
+            await cloudinary.uploader.destroy(filename);
+        }
+        await windowshop.updateOne({$pull: {images: {filename: {$in: req.body.deleteImages}}}})
+    }
     req.flash('success', 'Successfully updated windowshop!');
     res.redirect(`/windowshops/${windowshop._id}`);
 }
