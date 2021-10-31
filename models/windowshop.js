@@ -15,6 +15,7 @@ ImageSchema.virtual('thumbnail').get(function () {
     return this.url.replace('/upload', '/upload/w_200');
 })
 
+const opts = { toJSON: { virtuals: true } };
 
 const WindowshopSchema = new Schema({
     title: String,
@@ -22,6 +23,17 @@ const WindowshopSchema = new Schema({
     price: Number,
     description: String,
     location: String,
+    geometry: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            required: true
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        }
+    },
     author: {
         type: Schema.Types.ObjectId,
         ref: 'User'
@@ -38,6 +50,12 @@ const WindowshopSchema = new Schema({
             ref: 'Product'
         }
     ]
+}, opts);
+
+WindowshopSchema.virtual('properties.popUpMarkup').get(function () {
+    return `
+    <strong><a href="/windowshops/${this._id}">${this.title}</a><strong>
+    <p>${this.description.substring(0, 20)}...</p>`
 });
 
 WindowshopSchema.post('findOneAndDelete', async function (doc) {

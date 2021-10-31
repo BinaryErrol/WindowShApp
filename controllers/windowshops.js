@@ -1,5 +1,8 @@
-const { cloudinary } = require('../cloudinary');
 const Windowshop = require('../models/windowshop');
+const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
+const mapBoxToken = process.env.MAPBOX_TOKEN;
+const geocoder = mbxGeocoding({accessToken: mapBoxToken})
+const { cloudinary } = require('../cloudinary');
 
 module.exports.index = async(req,res) => {
     const windowshops = await Windowshop.find({});
@@ -11,12 +14,19 @@ module.exports.renderNewForm = (req,res) => {
 }
 
 module.exports.createWindowshop = async (req,res, next) => {
+
+    const geoData = await geocoder.forwardGeocode({
+        query: req.body.windowshop.location,
+        limit: 1
+    }).send()
     const windowshop = new Windowshop(req.body.windowshop);
+    windowshop.geometry = geoData.body.features[0].geometry;
     windowshop.images = req.files.map(f => ({url: f.path, filename: f.filename}));
     windowshop.author = req.user._id;
     await windowshop.save();
+    console.log(windowshop);
     req.flash('success', 'Successfully made a new Windowshop!');
-    res.redirect(`/windowshops/${windowshop._id}`);   
+    res.redirect(`/windowshops/${windowshop._id}`);  
 }
 
 module.exports.showWindowshop = async(req,res) => {

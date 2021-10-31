@@ -1,14 +1,21 @@
 <% layout('layouts/boilerplate') %> 
+<div id="map" style="width: 100%; height: 500px"></div>
 <h1>All Windowshops</h1>
 <div>
     <a href="/windowshops/new">Add a WindowShop</a>
 </div>
 
+<div>
     <% for (let windowshop of windowshops) {%>
         <div class="card" mb-3>
             <div class="row">
                 <div class="col-md-4">
-                    <img class="img-fluid" alt="" src="<%= windowshop.images[0].url  %> ">
+                    <%if(windowshop.images.length) {%>
+                        <img class="img-fluid" alt="" src="<%=windowshop.images[0].url%>">
+                        <% }else {%>
+                        <img class="img-fluid" alt=""
+                            src="https://res.cloudinary.com/douqbebwk/image/upload/v1600103881/YelpCamp/lz8jjv2gyynjil7lswf4.png">
+                        <% } %>
                 </div>
                 <div class="col-md-8">
                     <div class="card-body">
@@ -27,4 +34,11 @@
             </div>
         </div>
         <% } %> 
+</div>
+    
+<script>
+    const mapToken = '<%-process.env.MAPBOX_TOKEN%>';
+    const windowshops = { features: <%- JSON.stringify(windowshops) %>}
+</script>
 
+<script src="/javascripts/clusterMap.js"></script>

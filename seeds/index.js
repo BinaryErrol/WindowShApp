@@ -18,7 +18,7 @@ const sample = array => array[Math.floor(Math.random() * array.length)];
 
 const seedDB = async () => {
     await Windowshop.deleteMany({});
-    for(let i = 0; i < 50; i++) {
+    for(let i = 0; i < 200; i++) {
         const random1000 = Math.floor(Math.random() * 1000);
         const price = Math.floor(Math.random() *20) + 10;
         const shop = new Windowshop({
@@ -36,7 +36,14 @@ const seedDB = async () => {
                   }
             ],
             description: 'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsum dicta similique magnam. Quas recusandae nihil, nulla cupiditate eaque ea, aut magnam earum reprehenderit ab reiciendis sint? Sed est consectetur repellat?',
-            price
+            price,
+            geometry: {
+                type: "Point",
+                coordinates: [
+                    cities[random1000].longitude,
+                    cities[random1000].latitude,
+                ]
+            }
         })
         await shop.save();
     }
