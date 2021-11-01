@@ -205,7 +205,7 @@
                       </div>
                       <% } %> 
                       <% for (let comment of product.comments)  {%> 
-                        <h6 class="card-subtitle mb-2 text-muted"><%= comment.author %> </h6>
+                        <h6 class="card-subtitle mb-2 text-muted"><%= comment.author.username %> </h6>
                         <p><%= comment.body %></p>
                         <% if( currentUser && windowshop.author.equals(currentUser._id)) {%>
                         <form action="/windowshops/<%=windowshop._id%>/products/<%=product._id%>/comments/<%=comment._id%>?_method=DELETE" method="POST">

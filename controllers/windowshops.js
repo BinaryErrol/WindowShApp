@@ -32,7 +32,7 @@ module.exports.createWindowshop = async (req,res, next) => {
 module.exports.showWindowshop = async(req,res) => {
     const windowshop = await Windowshop.findById(req.params.id).populate({
         path: 'reviews', populate: { path: 'author'}}).populate({
-            path: 'products', populate: { path: 'comments', path: 'author'}}).populate('author');
+            path: 'products', populate: { path: 'comments'}}).populate('author');
     console.log(windowshop);
     if(!windowshop){
         req.flash('error', 'Cannot find that windowshop!');
